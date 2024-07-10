@@ -15,4 +15,15 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <string name="google_app_id">1:1042601795825:android:37f3ec7f3e7d37280c4950</string>
+    <string name="firebase_database_url">https://leave-management-6d5c9.firebaseio.com</string>
+    <string name="project_id">leave-management-6d5c9</string>
+    <string name="storage_bucket">leave-management-6d5c9.appspot.com</string>
+    <string name="location_id">us-central</string>
+    <string name="api_key">AIzaSyDRnLm43H542D5DsMG6h1S42ca7MxJnfdM</string>
+    <string name="gcm_defaultSenderId">1234567890</string>
+    <string name="google_api_key">AIzaSyDRnLm43H542D5DsMG6h1S42ca7MxJnfdM</string>
+    <string name="google_crash_reporting_api_key">AIzaSyDRnLm43H542D5DsMG6h1S42ca7MxJnfdM</string>
+    <string name="firebase_messaging_auto_init_enabled">false</string>
+    <string name="firebase_analytics_collection_enabled">true</string>
 </resources>
