@@ -1,83 +1,63 @@
 import 'package:flutter/material.dart';
+import 'auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:leave_management_system/screens/signup.dart';
-import 'home.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({Key? key}) : super(key: key);
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  String _role = 'teacher';
-  late String _identifier, _password;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: const Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              DropdownButtonFormField(
-                value: _role,
-                onChanged: (newValue) {
-                  setState(() {
-                    _role = newValue!;
-                  });
-                },
-                items: [
-                  DropdownMenuItem(value: 'teacher', child: Text('Teacher')),
-                  DropdownMenuItem(value: 'admin', child: Text('Admin')),
-                ],
-                decoration: InputDecoration(labelText: 'Role'),
-                validator: (value) => value == null ? 'Select role' : null,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: _role == 'teacher' ? 'Phone' : 'Superkey'),
-                validator: (value) => (value?.isEmpty ?? true) ?'Enter ${_role == 'teacher' ? 'phone number' : 'superkey'}' : null,
-                onSaved: (value) => _identifier = value!,
-              ),
-              TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) => (value?.isEmpty ?? true) ? 'Enter password' : null,
-                onSaved: (value) => _password = value!,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _login,
-                child: Text('Login'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpPage()));
-                },
-                child: Text('Sign Up'),
-              ),
-            ],
-          ),
+        child: Column(
+          children: [
+            TextField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email')),
+            TextField(
+                controller: _passwordController,
+                decoration: const InputDecoration(labelText: 'Password'),
+                obscureText: true),
+            ElevatedButton(
+              onPressed: () async {
+                User? user = await _authService.loginWithEmail(
+                    _emailController.text, _passwordController.text);
+                if (user != null) {
+                  DocumentSnapshot userDoc = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .get();
+                  Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+                  if (userData['role'] == 'admin') {
+                    Navigator.pushReplacementNamed(context, '/admin');
+                  } else {
+                    Navigator.pushReplacementNamed(context, '/home');
+                  }
+                }
+              },
+              child: const Text('Login'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/signup');
+              },
+              child: const Text('Don\'t have an account? Sign Up'),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  void _login() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState?.save();
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _role == 'teacher' ? _identifier + '@example.com' : _identifier + '@example.com',
-          password: _password,
-        );
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage()));
-      } on FirebaseAuthException catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message ?? 'An unknown error occurred')));
-      }
-    }
   }
 }
