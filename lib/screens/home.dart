@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart'; // For date formatting
 import 'leave_application.dart';
 import 'package:leave_management_system/screens/LoginPage.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,10 +33,16 @@ class HomePage extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
           if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: Text('No data found'));
           }
-          var userData = snapshot.data!.data() as Map<String, dynamic>;
+          var userData = snapshot.data!.data();
+          if (userData == null || !(userData is Map<String, dynamic>)) {
+            return const Center(child: Text('Invalid user data'));
+          }
           if (userData['role'] == 'teacher') {
             return const TeacherDashboard();
           } else {
@@ -48,7 +55,7 @@ class HomePage extends StatelessWidget {
 }
 
 class TeacherDashboard extends StatelessWidget {
-  const TeacherDashboard({super.key});
+  const TeacherDashboard({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,10 +69,16 @@ class TeacherDashboard extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching data'));
+        }
         if (!snapshot.hasData || snapshot.data == null) {
           return const Center(child: Text('No data found'));
         }
-        var leaveStats = snapshot.data!.data() as Map<String, dynamic>;
+        var leaveStats = snapshot.data!.data();
+        if (leaveStats == null || !(leaveStats is Map<String, dynamic>)) {
+          return const Center(child: Text('Invalid leave stats'));
+        }
         return Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -101,7 +114,7 @@ class TeacherDashboard extends StatelessWidget {
 }
 
 class AdminDashboard extends StatelessWidget {
-  const AdminDashboard({super.key});
+  const AdminDashboard({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +127,9 @@ class AdminDashboard extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (snapshot.hasError) {
+          return const Center(child: Text('Error fetching data'));
+        }
         if (!snapshot.hasData || snapshot.data == null) {
           return const Center(child: Text('No data found'));
         }
@@ -121,7 +137,10 @@ class AdminDashboard extends StatelessWidget {
         return ListView.builder(
           itemCount: teachers.length,
           itemBuilder: (context, index) {
-            var teacher = teachers[index].data() as Map<String, dynamic>;
+            var teacher = teachers[index].data();
+            if (teacher == null || !(teacher is Map<String, dynamic>)) {
+              return const SizedBox.shrink(); // or handle invalid data
+            }
             return ListTile(
               title: Text(teacher['name']),
               subtitle: Text(teacher['dept']),
@@ -143,7 +162,7 @@ class AdminDashboard extends StatelessWidget {
 class TeacherLeaveDetailsPage extends StatelessWidget {
   final String teacherId;
 
-  const TeacherLeaveDetailsPage({super.key, required this.teacherId});
+  const TeacherLeaveDetailsPage({Key? key, required this.teacherId});
 
   @override
   Widget build(BuildContext context) {
@@ -158,10 +177,16 @@ class TeacherLeaveDetailsPage extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error fetching data'));
+          }
           if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: Text('No data found'));
           }
-          var leaveStats = snapshot.data!.data() as Map<String, dynamic>;
+          var leaveStats = snapshot.data!.data();
+          if (leaveStats == null || !(leaveStats is Map<String, dynamic>)) {
+            return const Center(child: Text('Invalid leave stats'));
+          }
           return Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -190,6 +215,9 @@ class TeacherLeaveDetailsPage extends StatelessWidget {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
+                      if (snapshot.hasError) {
+                        return const Center(child: Text('Error fetching data'));
+                      }
                       if (!snapshot.hasData || snapshot.data == null) {
                         return const Center(child: Text('No data found'));
                       }
@@ -197,12 +225,14 @@ class TeacherLeaveDetailsPage extends StatelessWidget {
                       return ListView.builder(
                         itemCount: leaves.length,
                         itemBuilder: (context, index) {
-                          var leave =
-                              leaves[index].data() as Map<String, dynamic>;
+                          var leave = leaves[index].data();
+                          if (leave == null || !(leave is Map<String, dynamic>)) {
+                            return const SizedBox.shrink(); // or handle invalid data
+                          }
                           return ListTile(
                             title: Text('${leave['type']} leave'),
                             subtitle: Text(
-                                'From: ${leave['from_date'].toDate()} To: ${leave['to_date'].toDate()}'),
+                                'From: ${DateFormat.yMMMd().format(leave['from_date'].toDate())} To: ${DateFormat.yMMMd().format(leave['to_date'].toDate())}'),
                             trailing: DropdownButton(
                               value: leave['status'],
                               onChanged: (newValue) {
