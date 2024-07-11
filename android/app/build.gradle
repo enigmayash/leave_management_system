@@ -1,11 +1,10 @@
 plugins {
-    id 'com.android.application' // Apply the Android application plugin
-    id 'kotlin-android' // Apply the Kotlin plugin
-    id 'com.google.gms.google-services' // Apply the Google Services plugin
-    id 'dev.flutter.flutter-gradle' // Apply the Flutter Gradle plugin
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
-// Load local.properties file to get Flutter version code and name
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -14,45 +13,53 @@ if (localPropertiesFile.exists()) {
     }
 }
 
-// Set default Flutter version code and name if not specified in local.properties
-def flutterVersionCode = localProperties.getProperty("flutter.versionCode", "1")
-def flutterVersionName = localProperties.getProperty("flutter.versionName", "1.0")
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+if (flutterVersionCode == null) {
+    flutterVersionCode = "1"
+}
+
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
+if (flutterVersionName == null) {
+    flutterVersionName = "1.0"
+}
 
 android {
-    compileSdkVersion 31 // Set compile SDK version
-    buildToolsVersion "31.0.0" // Set build tools version
+    namespace = "com.example.leave_management_system"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 
     defaultConfig {
-        applicationId "com.example.leave_management_system" // Set your application ID
-        minSdkVersion 23 // Minimum SDK version required
-        targetSdkVersion 31 // Target SDK version
-        versionCode flutterVersionCode.toInteger() // Version code
-        versionName flutterVersionName // Version name
-
-        // Enable Java 8 bytecode compatibility
-        compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_8
-            targetCompatibility JavaVersion.VERSION_1_8
-        }
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId = "com.example.leave_management_system"
+        // You can update the following values to match your application needs.
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdk = 23
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutterVersionCode.toInteger()
+        versionName = flutterVersionName
+        multiDexEnabled true
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for release builds
-            // Example: signingConfig signingConfigs.release
-            signingConfig signingConfigs.debug // Use debug keys for now
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
+            signingConfig = signingConfigs.debug
         }
     }
-
-    // Add dependencies for Firebase (example with Firebase Analytics)
-    dependencies {
-        implementation platform('com.google.firebase:firebase-bom:33.1.1')
-        implementation 'com.google.firebase:firebase-analytics'
-        // Add other Firebase dependencies as needed for your project
-    }
+}
+dependencies {
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation platform('com.google.firebase:firebase-bom:33.1.1')
+    implementation 'com.google.firebase:firebase-analytics'
+    
 }
 
-// Flutter configuration
 flutter {
-    source '../..' // Relative path to your Flutter project directory
+    source = "../.."
 }
