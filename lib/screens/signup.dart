@@ -14,7 +14,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _deptController = TextEditingController();
-  String _role = 'teacher';
+  String _role = 'teaching_staff';
 
   final AuthService _authService = AuthService();
 
@@ -26,20 +26,35 @@ class _SignUpPageState extends State<SignUpPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _nameController, decoration: InputDecoration(labelText: 'Name')),
-            TextField(controller: _phoneController, decoration: InputDecoration(labelText: 'Phone No')),
-            TextField(controller: _idController, decoration: InputDecoration(labelText: 'ID')),
-            TextField(controller: _deptController, decoration: InputDecoration(labelText: 'Department')),
-            TextField(controller: _emailController, decoration: InputDecoration(labelText: 'Email')),
-            TextField(controller: _passwordController, decoration: InputDecoration(labelText: 'Password'), obscureText: true),
+            TextField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Name')),
+            TextField(
+                controller: _phoneController,
+                decoration: InputDecoration(labelText: 'Phone No')),
+            TextField(
+                controller: _idController,
+                decoration: InputDecoration(labelText: 'ID')),
+            TextField(
+                controller: _deptController,
+                decoration: InputDecoration(labelText: 'Department')),
+            TextField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email')),
+            TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true),
             DropdownButton<String>(
               value: _role,
               onChanged: (String? newValue) {
-                setState(() {
-                  _role = newValue!;
-                });
+                if (newValue != null) {
+                  setState(() {
+                    _role = newValue;
+                  });
+                }
               },
-              items: <String>['teacher', 'admin']
+              items: <String>['teaching_staff', 'hod', 'non_teaching_staff']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -55,8 +70,9 @@ class _SignUpPageState extends State<SignUpPage> {
                   'id': _idController.text,
                   'dept': _deptController.text,
                   'role': _role,
-                  'casualLeavesTaken': 0,
-                  'medicalLeavesTaken': 0,
+                  'CL_Taken': 0,
+                  'CML_Taken': 0,
+                  'RS_Taken': 0,
                 };
                 User? user = await _authService.signUpWithEmail(
                     _emailController.text, _passwordController.text, userData);

@@ -11,8 +11,9 @@ class LeaveApplicationPage extends StatefulWidget {
 class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
   final TextEditingController _fromDateController = TextEditingController();
   final TextEditingController _toDateController = TextEditingController();
-  String _leaveType = 'medical';
+  String _leaveType = 'CL';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -25,11 +26,13 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
             DropdownButton<String>(
               value: _leaveType,
               onChanged: (String? newValue) {
-                setState(() {
-                  _leaveType = newValue!;
-                });
+                if (newValue != null) {
+                  setState(() {
+                    _leaveType = newValue!;
+                  });
+                }
               },
-              items: <String>['medical', 'casual']
+              items: <String>['CL', 'CML', 'RS']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -49,7 +52,8 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
                 );
                 if (pickedDate != null) {
                   setState(() {
-                    _fromDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+                    _fromDateController.text =
+                        DateFormat('yyyy-MM-dd').format(pickedDate);
                   });
                 }
               },
@@ -66,16 +70,21 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
                 );
                 if (pickedDate != null) {
                   setState(() {
-                    _toDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+                    _toDateController.text =
+                        DateFormat('yyyy-MM-dd').format(pickedDate);
                   });
                 }
               },
             ),
             ElevatedButton(
-              onPressed: () {
-                String userId = FirebaseAuth.instance.currentUser!.uid;
-                _firestore.collection('leaves').add({
+              onPressed: () async{
+                String userId = _auth.currentUser!.uid;
+                DocumentSnapshot userDoc = await _firestore.collection('users').doc(userId).get();
+                Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+                await _firestore.collection('leaves').add({
                   'user_id': userId,
+                  'teacher_name': userData['name'],
+                  'teacher_id': userData['id'],
                   'type': _leaveType,
                   'from_date': _fromDateController.text,
                   'to_date': _toDateController.text,

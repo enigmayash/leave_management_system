@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
                       .doc(user.uid)
                       .get();
                   Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-                  if (userData['role'] == 'admin') {
+                  if (userData['role'] == 'hod') {
                     Navigator.pushReplacementNamed(context, '/admin');
                   } else {
                     Navigator.pushReplacementNamed(context, '/home');

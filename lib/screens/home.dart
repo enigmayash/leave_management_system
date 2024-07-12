@@ -39,10 +39,12 @@ class HomePage extends StatelessWidget {
 
           Map<String, dynamic> userData = snapshot.data!.data() as Map<String, dynamic>? ?? {};
 
-          int totalCasualLeaves = 10;
-          int totalMedicalLeaves = 10;
-          int casualLeavesTaken = userData['casualLeavesTaken'] ?? 0;
-          int medicalLeavesTaken = userData['medicalLeavesTaken'] ?? 0;
+          int total_CL = 15;
+          int total_CML = 10;
+          int total_RS = 2;
+          int CL_Taken = userData['CL-Taken'] ?? 0;
+          int CML_Taken = userData['CML-Taken'] ?? 0;
+          int RS_Taken = userData['RS-Taken'] ?? 0;
 
           return Padding(
             padding: const EdgeInsets.all(16.0),
@@ -56,15 +58,20 @@ class HomePage extends StatelessWidget {
                 SizedBox(height: 16),
                 Text('Leave Details:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
-                Text('Casual Leaves:'),
-                Text('  Total: $totalCasualLeaves'),
-                Text('  Taken: $casualLeavesTaken'),
-                Text('  Remaining: ${totalCasualLeaves - casualLeavesTaken}'),
+                Text('CL:'),
+                Text('  Total: $total_CL'),
+                Text('  Taken: $CL_Taken'),
+                Text('  Remaining: ${total_CL - CL_Taken}'),
                 SizedBox(height: 8),
-                Text('Medical Leaves:'),
-                Text('  Total: $totalMedicalLeaves'),
-                Text('  Taken: $medicalLeavesTaken'),
-                Text('  Remaining: ${totalMedicalLeaves - medicalLeavesTaken}'),
+                Text('CML:'),
+                Text('  Total: $total_CML'),
+                Text('  Taken: $CML_Taken'),
+                Text('  Remaining: ${total_CML - CML_Taken}'),
+                SizedBox(height: 24),
+                Text('RS:'),
+                Text('  Total: $total_RS'),
+                Text('  Taken: $RS_Taken'),
+                Text('  Remaining: ${total_RS - RS_Taken}'),
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
