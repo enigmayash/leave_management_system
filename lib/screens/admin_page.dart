@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AdminPage extends StatefulWidget {
+  const AdminPage({super.key});
+
   @override
   _AdminPageState createState() => _AdminPageState();
 }
@@ -20,7 +22,8 @@ class _AdminPageState extends State<AdminPage> {
 
   void _loadHodLeaves() async {
     String hodId = FirebaseAuth.instance.currentUser!.uid;
-    DocumentSnapshot hodDoc = await _firestore.collection('users').doc(hodId).get();
+    DocumentSnapshot hodDoc =
+        await _firestore.collection('users').doc(hodId).get();
     Map<String, dynamic> hodData = hodDoc.data() as Map<String, dynamic>;
     setState(() {
       hodLeaves = {
@@ -45,10 +48,10 @@ class _AdminPageState extends State<AdminPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('HOD Dashboard'),
+        title: const Text('HOD Dashboard'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: () => _logout(context),
           ),
         ],
@@ -60,70 +63,91 @@ class _AdminPageState extends State<AdminPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('HOD Leave Details:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 8),
-                Text('CL: Taken - ${hodLeaves['CL']}, Left - ${hodLeavesLeft['CL']}'),
-                Text('CML: Taken - ${hodLeaves['CML']}, Left - ${hodLeavesLeft['CML']}'),
-                Text('RS: Taken - ${hodLeaves['RS']}, Left - ${hodLeavesLeft['RS']}'),
-                SizedBox(height: 16),
+                const Text('HOD Leave Details:',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text(
+                    'CL: Taken - ${hodLeaves['CL']}, Left - ${hodLeavesLeft['CL']}'),
+                Text(
+                    'CML: Taken - ${hodLeaves['CML']}, Left - ${hodLeavesLeft['CML']}'),
+                Text(
+                    'RS: Taken - ${hodLeaves['RS']}, Left - ${hodLeavesLeft['RS']}'),
+                const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () => _updateHodLeaves(context),
-                  child: Text('Update My Leave'),
+                  child: const Text('Update My Leave'),
                 ),
               ],
             ),
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('leaves').where('status', isEqualTo: 'pending').snapshots(),
+              stream: _firestore
+                  .collection('leaves')
+                  .where('status', isEqualTo: 'pending')
+                  .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return Text('Something went wrong');
+                  return const Text('Something went wrong');
                 }
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 return ListView(
-                  children: snapshot.data!.docs.map((DocumentSnapshot document) {
-                    Map<String, dynamic> data = document.data() as Map<String, dynamic>;
+                  children:
+                      snapshot.data!.docs.map((DocumentSnapshot document) {
+                    Map<String, dynamic> data =
+                        document.data() as Map<String, dynamic>;
                     return FutureBuilder<DocumentSnapshot>(
-                      future: _firestore.collection('users').doc(data['user_id']).get(),
+                      future: _firestore
+                          .collection('users')
+                          .doc(data['user_id'])
+                          .get(),
                       builder: (context, userSnapshot) {
-                        if (userSnapshot.connectionState == ConnectionState.done) {
-                          Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                        if (userSnapshot.connectionState ==
+                            ConnectionState.done) {
+                          Map<String, dynamic> userData =
+                              userSnapshot.data!.data() as Map<String, dynamic>;
                           return Card(
                             child: ListTile(
-                              title: Text('Leave Application: ${data['teacher_name']}'),
+                              title: Text(
+                                  'Leave Application: ${data['teacher_name']} , ${data['role']}'),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Type: ${data['type']}, From: ${data['from_date']}, To: ${data['to_date']}'),
+                                  Text(
+                                      'Type: ${data['type']}, From: ${data['from_date']}, To: ${data['to_date']}'),
                                   Text('ID: ${userData['id']}'),
-                                  Text('CL Taken: ${(userData['CL_Taken'] as num?)?.toInt() ?? 0}, CML Taken: ${(userData['CML_Taken'] as num?)?.toInt() ?? 0}, RS Taken: ${(userData['RS_Taken'] as num?)?.toInt() ?? 0}'),
-                                  Text('CL Left: ${15 - ((userData['CL_Taken'] as num?)?.toInt() ?? 0)}, CML Left: ${10 - ((userData['CML_Taken'] as num?)?.toInt() ?? 0)}, RS Left: ${2 - ((userData['RS_Taken'] as num?)?.toInt() ?? 0)}'),
+                                  Text(
+                                      'CL Taken: ${(userData['CL_Taken'] as num?)?.toInt() ?? 0}, CML Taken: ${(userData['CML_Taken'] as num?)?.toInt() ?? 0}, RS Taken: ${(userData['RS_Taken'] as num?)?.toInt() ?? 0}'),
+                                  Text(
+                                      'CL Left: ${15 - ((userData['CL_Taken'] as num?)?.toInt() ?? 0)}, CML Left: ${10 - ((userData['CML_Taken'] as num?)?.toInt() ?? 0)}, RS Left: ${2 - ((userData['RS_Taken'] as num?)?.toInt() ?? 0)}'),
                                 ],
                               ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   ElevatedButton(
-                                    onPressed: () => approveLeave(document.id, data['user_id'], data['type']),
-                                    child: Text('Approve'),
+                                    onPressed: () => approveLeave(document.id,
+                                        data['user_id'], data['type']),
+                                    child: const Text('Approve'),
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   ElevatedButton(
                                     onPressed: () => rejectLeave(document.id),
-                                    child: Text('Reject'),
-                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.red),
+                                    child: const Text('Reject'),
                                   ),
                                 ],
                               ),
                             ),
                           );
                         }
-                        return CircularProgressIndicator();
+                        return const CircularProgressIndicator();
                       },
                     );
                   }).toList(),
@@ -136,7 +160,8 @@ class _AdminPageState extends State<AdminPage> {
     );
   }
 
-  Future<void> approveLeave(String leaveId, String userId, String leaveType) async {
+  Future<void> approveLeave(
+      String leaveId, String userId, String leaveType) async {
     await _firestore.runTransaction((transaction) async {
       DocumentReference leaveRef = _firestore.collection('leaves').doc(leaveId);
       DocumentReference userRef = _firestore.collection('users').doc(userId);
@@ -146,7 +171,8 @@ class _AdminPageState extends State<AdminPage> {
         throw Exception("User does not exist!");
       }
 
-      Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> userData =
+          userSnapshot.data() as Map<String, dynamic>;
       String field = '${leaveType}_Taken';
       int currentLeaves = (userData[field] as num?)?.toInt() ?? 0;
 
@@ -156,49 +182,58 @@ class _AdminPageState extends State<AdminPage> {
   }
 
   Future<void> rejectLeave(String leaveId) async {
-    await _firestore.collection('leaves').doc(leaveId).update({'status': 'rejected'});
+    await _firestore
+        .collection('leaves')
+        .doc(leaveId)
+        .update({'status': 'rejected'});
   }
 
   void _updateHodLeaves(BuildContext context) async {
-    String? selectedLeaveType;
-    await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Update Leave'),
-        content: DropdownButton<String>(
-          value: selectedLeaveType,
-          hint: Text('Select leave type'),
-          items: ['CL', 'CML', 'RS'].map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
-          }).toList(),
-          onChanged: (value) {
-            selectedLeaveType = value;
-          },
-        ),
-        actions: [
-          TextButton(
-            child: Text('Cancel'),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          TextButton(
-            child: Text('Update'),
-            onPressed: () async {
-              if (selectedLeaveType != null) {
-                String hodId = FirebaseAuth.instance.currentUser!.uid;
-                String field = '${selectedLeaveType}_Taken';
-                await _firestore.collection('users').doc(hodId).update({
-                  field: FieldValue.increment(1)
-                });
-                _loadHodLeaves();
-                Navigator.of(context).pop();
-              }
+  String selectedLeaveType = 'CL'; // Initialize with default value
+  await showDialog(
+    context: context,
+    builder: (context) => StatefulBuilder(
+      builder: (context, setState) {
+        return AlertDialog(
+          title: const Text('Update Leave'),
+          content: DropdownButton<String>(
+            value: selectedLeaveType,
+            hint: const Text('Select leave type'),
+            items: ['CL', 'CML', 'RS'].map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedLeaveType = value!;
+              });
             },
           ),
-        ],
-      ),
-    );
-  }
+          actions: [
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+            TextButton(
+              child: const Text('Update'),
+              onPressed: () async {
+                String hodId = FirebaseAuth.instance.currentUser!.uid;
+                String field = '${selectedLeaveType}_Taken';
+                await _firestore
+                    .collection('users')
+                    .doc(hodId)
+                    .update({field: FieldValue.increment(1)});
+                _loadHodLeaves();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
 }

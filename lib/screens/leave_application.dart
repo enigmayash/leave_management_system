@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
 class LeaveApplicationPage extends StatefulWidget {
+  const LeaveApplicationPage({super.key});
+
   @override
   _LeaveApplicationPageState createState() => _LeaveApplicationPageState();
 }
@@ -18,7 +20,7 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Apply for Leave')),
+      appBar: AppBar(title: const Text('Apply for Leave')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -28,7 +30,7 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
               onChanged: (String? newValue) {
                 if (newValue != null) {
                   setState(() {
-                    _leaveType = newValue!;
+                    _leaveType = newValue;
                   });
                 }
               },
@@ -42,7 +44,7 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
             ),
             TextField(
               controller: _fromDateController,
-              decoration: InputDecoration(labelText: 'From Date'),
+              decoration: const InputDecoration(labelText: 'From Date'),
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
                   context: context,
@@ -60,7 +62,7 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
             ),
             TextField(
               controller: _toDateController,
-              decoration: InputDecoration(labelText: 'To Date'),
+              decoration: const InputDecoration(labelText: 'To Date'),
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
                   context: context,
@@ -77,14 +79,17 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
               },
             ),
             ElevatedButton(
-              onPressed: () async{
+              onPressed: () async {
                 String userId = _auth.currentUser!.uid;
-                DocumentSnapshot userDoc = await _firestore.collection('users').doc(userId).get();
-                Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+                DocumentSnapshot userDoc =
+                    await _firestore.collection('users').doc(userId).get();
+                Map<String, dynamic> userData =
+                    userDoc.data() as Map<String, dynamic>;
                 await _firestore.collection('leaves').add({
                   'user_id': userId,
                   'teacher_name': userData['name'],
                   'teacher_id': userData['id'],
+                  'role': userData['role'],
                   'type': _leaveType,
                   'from_date': _fromDateController.text,
                   'to_date': _toDateController.text,
@@ -92,7 +97,7 @@ class _LeaveApplicationPageState extends State<LeaveApplicationPage> {
                 });
                 Navigator.pushReplacementNamed(context, '/home');
               },
-              child: Text('Apply'),
+              child: const Text('Apply'),
             ),
           ],
         ),
